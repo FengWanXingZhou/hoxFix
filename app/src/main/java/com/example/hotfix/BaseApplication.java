@@ -12,6 +12,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import dalvik.system.DexClassLoader;
 import dalvik.system.PathClassLoader;
@@ -24,9 +26,10 @@ public class BaseApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        //getPrivateDex(new File(Environment.getExternalStorageDirectory().getPath()));
+
         getPrivateDex(getApplicationContext().getExternalFilesDir(null));
         mergeDex();
+        //browserPrivateDex(getApplicationContext().getExternalFilesDir(null));
     }
 
     @Override
@@ -89,6 +92,52 @@ public class BaseApplication extends Application {
 
         }
         return latestArray;
+
+
+
+    }
+
+    private void browserPrivateDex(File path){
+        if(path == null){
+            Log.i("HotFix","path null");
+        }else{
+            Log.i("HotFix","path :"+path.getPath());
+        }
+        File rootPath = path;
+        Stack<File> fileStack = new Stack<>();
+
+
+        while(rootPath != null){
+            Log.i("HotFix","file :"+rootPath.getName());
+
+
+            if(rootPath.isDirectory()){
+
+                File[] nextFileList = rootPath.listFiles();
+
+                if(nextFileList !=null &&nextFileList.length>0){
+                    for(int i =0 ;i < nextFileList.length;i++){
+                        if(i == 0){
+                            rootPath = nextFileList[i];
+
+                        }else{
+                            fileStack.push(nextFileList[i]);
+                        }
+
+                    }
+
+                }
+
+            }else {
+                if (fileStack.size() == 0) {
+                    break;
+                }
+                rootPath = fileStack.pop();
+            }
+
+
+
+        }
 
 
 
